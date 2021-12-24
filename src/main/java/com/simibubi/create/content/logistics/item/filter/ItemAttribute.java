@@ -9,6 +9,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.simibubi.create.content.contraptions.processing.fan.FanProcessingType;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.simibubi.create.AllRecipeTypes;
@@ -138,7 +140,7 @@ public interface ItemAttribute {
 		NOT_STACKABLE(((Predicate<ItemStack>) ItemStack::isStackable).negate()),
 		EQUIPABLE(s -> s.getEquipmentSlot() != null),
 		FURNACE_FUEL(AbstractFurnaceBlockEntity::isFuel),
-		WASHABLE(InWorldProcessing::isWashable),
+		WASHABLE(FanProcessingType.SPLASHING::canProcess),
 		CRUSHABLE((s, w) -> testRecipe(s, w, AllRecipeTypes.CRUSHING.getType())
 			|| testRecipe(s, w, AllRecipeTypes.MILLING.getType())),
 		SMELTABLE((s, w) -> testRecipe(s, w, RecipeType.SMELTING)),

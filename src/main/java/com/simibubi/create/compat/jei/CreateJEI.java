@@ -11,6 +11,8 @@ import com.simibubi.create.content.contraptions.components.saw.SawTileEntity;
 import com.simibubi.create.content.contraptions.fluids.potion.PotionFluid;
 import com.simibubi.create.content.contraptions.fluids.recipe.PotionMixingRecipeManager;
 import com.simibubi.create.content.contraptions.processing.BasinRecipe;
+import com.simibubi.create.content.contraptions.processing.fan.FanProcessingType;
+import com.simibubi.create.content.contraptions.processing.fan.SpecialFanType;
 import com.simibubi.create.content.curiosities.tools.BlueprintScreen;
 import com.simibubi.create.content.logistics.item.LinkedControllerScreen;
 import com.simibubi.create.content.logistics.item.filter.AbstractFilterScreen;
@@ -66,16 +68,10 @@ public class CreateJEI implements IModPlugin {
 			.catalyst(AllBlocks.MECHANICAL_PRESS::get)
 			.build(),
 
-	washing = register("fan_washing", FanWashingCategory::new).recipes(AllRecipeTypes.SPLASHING)
-			.catalystStack(ProcessingViaFanCategory.getFan("fan_washing"))
-			.build(),
 
 	smoking = register("fan_smoking", FanSmokingCategory::new).recipes(() -> RecipeType.SMOKING)
 			.catalystStack(ProcessingViaFanCategory.getFan("fan_smoking"))
 			.build(),
-
-	soul_smoking = register("fan_soul_smoking", FanSoulSmokingCategory::new).recipes(AllRecipeTypes.SOUL_SMOKING)
-			.catalystStack(ProcessingViaFanCategory.getFan("fan_soul_smoking")).build(),
 
 	blasting = register("fan_blasting", FanBlastingCategory::new)
 			.recipesExcluding(() -> RecipeType.SMELTING, () -> RecipeType.BLASTING)
@@ -186,6 +182,16 @@ public class CreateJEI implements IModPlugin {
 			register("mechanical_crafting", MechanicalCraftingCategory::new).recipes(AllRecipeTypes.MECHANICAL_CRAFTING)
 					.catalyst(AllBlocks.MECHANICAL_CRAFTER::get)
 					.build();
+
+	{
+		for (FanProcessingType fanType : FanProcessingType.ALL_TYPES){
+			if (fanType instanceof SpecialFanType<?> type){
+				register(type.info.id(), ()->new SpecialFanProcessingCategory<>(type))
+						.recipes(type.info.recipeType())
+						.catalystStack(ProcessingViaFanCategory.getFan(type.info.id())).build();
+			}
+		}
+	}
 
 	private <T extends Recipe<?>> CategoryBuilder<T> register(String name,
 															  Supplier<CreateRecipeCategory<T>> supplier) {

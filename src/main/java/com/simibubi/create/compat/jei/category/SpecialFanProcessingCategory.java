@@ -1,42 +1,48 @@
 package com.simibubi.create.compat.jei.category;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
-import com.simibubi.create.content.contraptions.components.fan.SplashingRecipe;
 import com.simibubi.create.content.contraptions.processing.ProcessingOutput;
+import com.simibubi.create.content.contraptions.processing.fan.FanProcessingRecipe;
+import com.simibubi.create.content.contraptions.processing.fan.FanProcessingType;
+import com.simibubi.create.content.contraptions.processing.fan.SpecialFanType;
+import com.simibubi.create.content.contraptions.processing.fan.SplashingRecipe;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.gui.element.GuiGameElement;
-
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.material.Fluids;
 
-public class FanWashingCategory extends ProcessingViaFanCategory<SplashingRecipe> {
+import java.util.Arrays;
+import java.util.List;
 
-	public FanWashingCategory() {
-		super(185, doubleItemIcon(AllItems.PROPELLER.get(), Items.WATER_BUCKET));
+public class SpecialFanProcessingCategory<R extends FanProcessingRecipe, T extends SpecialFanType<R>> extends ProcessingViaFanCategory<R> {
+
+	private final T type;
+
+	public SpecialFanProcessingCategory(T type) {
+		super(185, doubleItemIcon(AllItems.PROPELLER.get(), type.info.icon()));
+		this.type = type;
 	}
 
 	@Override
-	public Class<? extends SplashingRecipe> getRecipeClass() {
-		return SplashingRecipe.class;
+	public Class<R> getRecipeClass() {
+		return type.info.recipeClass();
 	}
 
 	@Override
-	public void setIngredients(SplashingRecipe recipe, IIngredients ingredients) {
+	public void setIngredients(R recipe, IIngredients ingredients) {
 		ingredients.setInputIngredients(recipe.getIngredients());
 		ingredients.setOutputs(VanillaTypes.ITEM, recipe.getRollableResultsAsItemStacks());
 	}
 
 	@Override
-	public void setRecipe(IRecipeLayout recipeLayout, SplashingRecipe recipe, IIngredients ingredients) {
+	public void setRecipe(IRecipeLayout recipeLayout, R recipe, IIngredients ingredients) {
 		IGuiItemStackGroup itemStacks = recipeLayout.getItemStacks();
 		List<ProcessingOutput> results = recipe.getRollableResults();
 		int xOffsetGlobal = 8 * (3 - Math.min(3, results.size()));
@@ -62,7 +68,7 @@ public class FanWashingCategory extends ProcessingViaFanCategory<SplashingRecipe
 	}
 
 	@Override
-	protected void renderWidgets(PoseStack matrixStack, SplashingRecipe recipe, double mouseX, double mouseY) {
+	protected void renderWidgets(PoseStack matrixStack, R recipe, double mouseX, double mouseY) {
 		int size = recipe.getRollableResultsAsItemStacks()
 			.size();
 		int xOffsetGlobal = 8 * (3 - Math.min(3, size));
@@ -92,13 +98,7 @@ public class FanWashingCategory extends ProcessingViaFanCategory<SplashingRecipe
 	@Override
 	public void renderAttachedBlock(PoseStack matrixStack) {
 		matrixStack.pushPose();
-
-		GuiGameElement.of(Fluids.WATER)
-			.scale(24)
-			.atLocal(0, 0, 2)
-			.lighting(AnimatedKinetics.DEFAULT_LIGHTING)
-			.render(matrixStack);
-
+		type.info.display().get().render(matrixStack);
 		matrixStack.popPose();
 	}
 

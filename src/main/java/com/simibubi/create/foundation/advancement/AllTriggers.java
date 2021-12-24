@@ -25,7 +25,7 @@ public class AllTriggers {
 	public static final StringSerializableTrigger<Block> BRACKET_APPLY_TRIGGER =
 		add(new RegistryTrigger<>("bracket_apply", ForgeRegistries.BLOCKS));
 	public static final StringSerializableTrigger<InWorldProcessing.Type> FAN_PROCESSING =
-		add(new EnumTrigger<>("fan_processing", InWorldProcessing.Type.class));
+		 add(new SimpleStringSerializableTrigger<>("fan_processing", InWorldProcessing.Type::valueOf, InWorldProcessing.Type::toString));
 
 	public static final SimpleTrigger ROTATION = simple("rotation"), OVERSTRESSED = simple("overstressed"),
 		SHIFTING_GEARS = simple("shifting_gears"), CONNECT_BELT = simple("connect_belt"), BONK = simple("bonk"),

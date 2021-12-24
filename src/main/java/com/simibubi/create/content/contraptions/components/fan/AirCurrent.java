@@ -4,6 +4,7 @@ import com.simibubi.create.AllTags;
 import com.simibubi.create.content.contraptions.particle.AirFlowParticleData;
 import com.simibubi.create.content.contraptions.processing.InWorldProcessing;
 import com.simibubi.create.content.contraptions.processing.InWorldProcessing.Type;
+import com.simibubi.create.content.contraptions.processing.fan.FanProcessingType;
 import com.simibubi.create.foundation.advancement.AllTriggers;
 import com.simibubi.create.foundation.config.AllConfigs;
 import com.simibubi.create.foundation.tileEntity.TileEntityBehaviour;
@@ -18,16 +19,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,9 +44,9 @@ import java.util.List;
 
 public class AirCurrent {
 
-	private static final DamageSource damageSourceFire = new DamageSource("create.fan_fire").setScalesWithDifficulty()
+	public static final DamageSource damageSourceFire = new DamageSource("create.fan_fire").setScalesWithDifficulty()
 			.setIsFire();
-	private static final DamageSource damageSourceLava = new DamageSource("create.fan_lava").setScalesWithDifficulty()
+	public static final DamageSource damageSourceLava = new DamageSource("create.fan_lava").setScalesWithDifficulty()
 			.setIsFire();
 
 	public final IAirCurrentSource source;
@@ -146,41 +141,8 @@ public class AirCurrent {
 			if (world.isClientSide)
 				continue;
 
-			switch (processingType) {
-				case BLASTING:
-					if (!entity.fireImmune()) {
-						entity.setSecondsOnFire(10);
-						entity.hurt(damageSourceLava, 4);
-					}
-					break;
-				case SMOKING:
-					if (!entity.fireImmune()) {
-						entity.setSecondsOnFire(2);
-						entity.hurt(damageSourceFire, 2);
-					}
-					break;
-				case SOUL_SMOKING: //TODO maybe I should use new damage source instead of the regular smoke one?
-					if (entity instanceof LivingEntity livingEntity) {
-						livingEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
-					}
-					if (!entity.fireImmune()) {
-						entity.setSecondsOnFire(10);
-						entity.hurt(damageSourceFire, 4);
-					}
-					break;
-				case SPLASHING:
-					if (entity instanceof EnderMan || entity.getType() == EntityType.SNOW_GOLEM
-							|| entity.getType() == EntityType.BLAZE) {
-						entity.hurt(DamageSource.DROWN, 2);
-					}
-					if (!entity.isOnFire())
-						break;
-					entity.clearFire();
-					world.playSound(null, entity.blockPosition(), SoundEvents.GENERIC_EXTINGUISH_FIRE,
-							SoundSource.NEUTRAL, 0.7F, 1.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
-					break;
-				default:
-					break;
+			if (processingType instanceof FanProcessingType fanType){
+				fanType.affectEntity(entity, world);
 			}
 		}
 

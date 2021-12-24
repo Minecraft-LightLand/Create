@@ -3,6 +3,7 @@ package com.simibubi.create.content.contraptions.particle;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.contraptions.components.fan.IAirCurrentSource;
 import com.simibubi.create.content.contraptions.processing.InWorldProcessing;
+import com.simibubi.create.content.contraptions.processing.fan.FanProcessingType;
 import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.VecHelper;
 
@@ -11,6 +12,7 @@ import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
@@ -92,59 +94,25 @@ public class AirFlowParticle extends SimpleAnimatedParticle {
 
 	}
 
+	public void dupeParticle(float chance, ParticleOptions type, double speed){
+		if (level.random.nextFloat() < chance) {
+			level.addParticle(type, x, y, z, xd * speed, yd * speed, zd * speed);
+		}
+	}
+
+	public void setAppearance(int color_0, int color_1, float alpha, int sprite_max){
+		setColor(Color.mixColors(color_0, color_1, level.random.nextFloat()));
+		setAlpha(alpha);
+		selectSprite(level.random.nextInt(sprite_max));
+	}
+
 	public void morphType(double distance) {
 		if (source.getAirCurrent() == null)
 			return;
 		InWorldProcessing.Type type = source.getAirCurrent().getSegmentAt((float) distance);
-
-		if (type == InWorldProcessing.Type.SPLASHING) {
-			setColor(Color.mixColors(0x4499FF, 0x2277FF, level.random.nextFloat()));
-			setAlpha(1f);
-			selectSprite(level.random.nextInt(3));
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.BUBBLE, x, y, z, xd * .125f, yd * .125f,
-						zd * .125f);
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.BUBBLE_POP, x, y, z, xd * .125f, yd * .125f,
-						zd * .125f);
+		if (type instanceof FanProcessingType fanType){
+			fanType.morphType(this, distance);
 		}
-
-		if (type == InWorldProcessing.Type.SMOKING) {
-			setColor(Color.mixColors(0x0, 0x555555, level.random.nextFloat()));
-			setAlpha(1f);
-			selectSprite(level.random.nextInt(3));
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.SMOKE, x, y, z, xd * .125f, yd * .125f,
-						zd * .125f);
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.LARGE_SMOKE, x, y, z, xd * .125f, yd * .125f,
-						zd * .125f);
-		}
-
-		if (type == InWorldProcessing.Type.SOUL_SMOKING) {//TODO soul smoking special particle?
-			setColor(Color.mixColors(0x0, 0x555555, level.random.nextFloat()));
-			setAlpha(1f);
-			selectSprite(level.random.nextInt(3));
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.SMOKE, x, y, z, xd * .125f, yd * .125f,
-						zd * .125f);
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.LARGE_SMOKE, x, y, z, xd * .125f, yd * .125f,
-						zd * .125f);
-		}
-
-		if (type == InWorldProcessing.Type.BLASTING) {
-			setColor(Color.mixColors(0xFF4400, 0xFF8855, level.random.nextFloat()));
-			setAlpha(.5f);
-			selectSprite(level.random.nextInt(3));
-			if (level.random.nextFloat() < 1 / 32f)
-				level.addParticle(ParticleTypes.FLAME, x, y, z, xd * .25f, yd * .25f,
-						zd * .25f);
-			if (level.random.nextFloat() < 1 / 16f)
-				level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.LAVA.defaultBlockState()), x, y,
-						z, xd * .25f, yd * .25f, zd * .25f);
-		}
-
 		if (type == null) {
 			setColor(0xEEEEEE);
 			setAlpha(.25f);
